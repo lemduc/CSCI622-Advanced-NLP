@@ -1,0 +1,211 @@
+Duc Minh Le
+
+1. I have written a python script to parse the spanishvocab.txt files
+For each word, I kept the state transition in a set to make sure that I don't add duplicated transitions
+for the first four words, my FSA is looked like following.
+(0)--A-->(1)--*e*-->(2)  <------------------
+          |                                |
+          --A-->(3)--A-->(4)--R-->(5)--*e*--
+          |                                |
+          --B-->(6)--*e*--------------------
+                 |                         |
+                 --A-->(7)--*e*-------------
+Notes:
+- (2) will automatically be selected as final state during my script
+- Later on, to support several words and space, I also add transitions from the last characters to start state (0), and space _ from start state to itself
+
+I have tried the FSA with some examples, here are the result:
+
+1---------
+echo ' "L" "O" "S" "_" "G" "A" "T" "O" "S" ' | ./carmel -sli spanish.fsa
+Input line 1:  "L" "O" "S" "_" "G" "A" "T" "O" "S" 
+	(25 states / 28 arcs reduce-> 16/16)
+
+13
+(0 (1 "L"))
+(1 (2 "O"))
+(2 (3 "S"))
+(3 (4))
+(4 (5 "_"))
+(5 (6 "G"))
+(6 (7 "A"))
+(7 (9) (8 "T"))
+(8 (14 "O"))
+(9 (10 "T"))
+(10 (11 "O"))
+(11 (12 "S"))
+(12 (13))
+(13)
+(14 (15 "S"))
+(15 (13))
+------------
+2-----------
+echo ' "L" "O" "S" "G" "_" "R" "I" "S" "T" ' | ./carmel -sli spanish.fsa
+Input line 1:  "L" "O" "S" "G" "_" "R" "I" "S" "T" 
+	(0 states / 0 arcs)
+Empty or invalid result of composition with transducer "spanish.fsa".
+No derivations found for 1 of 1 inputs
+Viterbi (best path) product of probs=1, probability=2^0 per-input-symbol-perplexity(N=9)=2^-0, excluding 1 0 probabilities (i.e. real ppx is infinite).
+-------------
+
+The size of the FSA seems to be big. Here is the size:
+-------------
+./carmel -c spanish.fsa 
+
+Number of states in result: 205506
+Number of arcs in result: 390997
+Number of paths in result (valid for acyclic only; a cycle means infinitely many): 185492.000000013
+Number of cycle-causing arcs in result: 92747
+-------------
+
+2. I have written a python script to loop through all upper-cased characters and decide to keep it or not
+
+(0)--A:*e*-->(0)
+(0)--B:B---->(0)
+(0)--C:C---->(0)
+(0)--D:D---->(0)
+(0)--E:*e*-->(0)
+....
+(0)--_:_-->(0)
+
+
+Here are some examples:
+1------------
+echo ' "G" "A" "T" "O" "_" "A" "Q" "U" "I" ' | ./carmel -sliOEWk 10 vowel-deleter.fst
+Input line 1:  "G" "A" "T" "O" "_" "A" "Q" "U" "I" 
+	(10 states / 9 arcs)
+"G" "T" "_" "Q"
+-------------
+2------------
+echo ' "P" "R" "R" "_" "Q" ' | ./carmel -sriIEWk 10 vowel-deleter.fst
+Input line 1:  "P" "R" "R" "_" "Q" 
+	(13 states / 72 arcs)
+"P" "R" "R" "_" "Q"
+"P" "R" "R" "_" "Q" "U"
+"P" "R" "R" "_" "U" "Q"
+"P" "R" "R" "_" "Q" "U" "U"
+"P" "R" "R" "_" "U" "Q" "U"
+"P" "R" "R" "_" "Q" "U" "U" "U"
+"P" "R" "R" "_" "U" "Q" "U" "U"
+"P" "R" "R" "_" "Q" "U" "U" "U" "U"
+"P" "R" "R" "_" "U" "Q" "U" "U" "U"
+"P" "R" "R" "_" "Q" "U" "U" "U" "U" "U"
+-------------
+Note:
+- There is no restriction, so I do not limit 1 vowel between characters, however, it might need to be done.
+
+3. This is a simple one, similar to the fst in question 2. Here are some examples:
+
+1------------
+echo ' "G" "A" "T" "O" "_" "A" "Q" "U" "I" ' | ./carmel -sliOEWk 10 space-deleter.fst
+Input line 1:  "G" "A" "T" "O" "_" "A" "Q" "U" "I" 
+	(10 states / 9 arcs)
+"G" "A" "T" "O" "A" "Q" "U" "I"
+-------------
+2------------
+echo ' "P" "R" "R" "Q" ' | ./carmel -sriIEWk 10 space-deleter.fst
+Input line 1:  "P" "R" "R" "Q" 
+	(11 states / 20 arcs)
+"P" "R" "R" "Q"
+"P" "R" "R" "Q" "_"
+"P" "R" "R" "_" "Q"
+"P" "R" "R" "Q" "_" "_"
+"P" "R" "R" "_" "Q" "_"
+"P" "R" "R" "Q" "_" "_" "_"
+"P" "R" "R" "_" "Q" "_" "_"
+"P" "R" "R" "Q" "_" "_" "_" "_"
+"P" "R" "R" "_" "Q" "_" "_" "_"
+"P" "R" "R" "Q" "_" "_" "_" "_" "_"
+-------------
+Note:
+- There is no restriction, so I do not limit 1 space between characters, however, it might need to be done.
+
+4. I have written a python script to generate all possible typo based on the following key map
+
+KeyboardRow1S = ["~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+", ""]
+KeyboardRow2S = ["", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "|"]
+KeyboardRow3S = ["","A", "S", "D", "F", "G", "H", "J", "K", "L", ":", "", "", ""]
+KeyboardRow4S = ["", "Z", "X", "C", "V", "B", "N", "M", "<", ">", "?", "", "", ""]
+Array2S = [KeyboardRow1S, KeyboardRow2S, KeyboardRow3S, KeyboardRow4S]
+
+The tricky part in this FST is to be able to random only at every 3rd character.
+So I maintain three states: 0,1,2. 0 is the start state. Characters move from 0 to 1, then 1 to 2 without changing.
+When a character move from 2 back to 0, I use the mapping to generate typos.
+Furthermore, I maintain state 3 as the final state. If there are 1 or 2 left characters, then fst moves to the final state (3) and stop the conversion.
+
+The sketch of the FST can be seen as the following
+
+
+ |-------------------------------------*e*:*e*------------>(3)
+ |            -------------------------*e*:*e*------------>(3) (TERMINATED)
+ |            |------------------------*e*:*e*------------>(3)
+(0)--A:A---->(1)--A:A----->(2)---A:Q---->(0) (RECOUNT 3 CHARACTERS)
+ |         |   |         |   |---A:Z---|
+ |---B:B---|   |---B:B---|   |---A:W---|
+ |         |   |         |   |---A:S---|
+ |---C:C---|   |---C:C---|   |---A:X---|
+ |         |   |         |   |         |
+   ....          ....         ....
+
+
+Here are some examples:
+1------------
+echo ' "G" "A" "T" "O" ' | ./carmel -sliOEWk 10 typo.fst
+Input line 1:  "G" "A" "T" "O" 
+	(10 states / 13 arcs reduce-> 6/9)
+"G" "A" "R" "O"
+"G" "A" "Y" "O"
+"G" "A" "F" "O"
+"G" "A" "G" "O"
+"G" "A" "H" "O"
+-------------
+2------------
+echo ' "G" "A" "T" "O" "_" "A" ' | ./carmel -sliOEWk 10 typo.fst
+Input line 1:  "G" "A" "T" "O" "_" "A" 
+	(14 states / 17 arcs reduce-> 8/11)
+"G" "A" "R" "O" "_" "A"
+"G" "A" "Y" "O" "_" "A"
+"G" "A" "F" "O" "_" "A"
+"G" "A" "G" "O" "_" "A"
+"G" "A" "H" "O" "_" "A"
+-------------
+3------------
+echo ' "G" "A" "T" "O" "_" "A" "Q" ' | ./carmel -sliOEWk 10 typo.fst
+Input line 1:  "G" "A" "T" "O" "_" "A" "Q" 
+	(16 states / 21 arcs reduce-> 9/14)
+"G" "A" "R" "O" "_" "A" "W"
+"G" "A" "R" "O" "_" "A" "A"
+"G" "A" "Y" "O" "_" "A" "W"
+"G" "A" "R" "O" "_" "A" "S"
+"G" "A" "Y" "O" "_" "A" "A"
+"G" "A" "F" "O" "_" "A" "W"
+"G" "A" "Y" "O" "_" "A" "S"
+"G" "A" "F" "O" "_" "A" "A"
+"G" "A" "H" "O" "_" "A" "W"
+"G" "A" "F" "O" "_" "A" "S"
+-------------
+
+5. I have manually entered this FST based on the text description. Here are some examples:
+1------------
+echo ' "pho-k" "pho-a" "pho-y" "pho-e" ' | ./carmel -OQWEslik 5 spell.fst
+Input line 1:  "pho-k" "pho-a" "pho-y" "pho-e" 
+	(10 states / 19 arcs)
+C L L E
+C L L E H
+C L L H E
+C L L E H H
+C L L H E H
+-------------
+2------------
+echo ' "C" "A" "L" "L" "E" ' | ./carmel -IQWEsrik 5 spell.fst
+Input line 1:  "C" "A" "L" "L" "E" 
+	(25 states / 47 arcs reduce-> 20/37)
+pho-k pho-u pho-a pho-l pho-l pho-e
+pho-k pho-u pho-a pho-l pho-l pho-e pho-k pho-s
+pho-k pho-u pho-a pho-l pho-l pho-k pho-s pho-e
+pho-k pho-u pho-a pho-l pho-l pho-e pho-k pho-s pho-k pho-s
+pho-k pho-u pho-a pho-l pho-l pho-k pho-s pho-e pho-k pho-s
+-------------
+
+6. By adding spanish.fsa before other fst(s), we can improve the quality of the models because we only process the spanish keywords in the dictionary.
+

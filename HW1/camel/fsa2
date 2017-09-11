@@ -1,0 +1,5 @@
+%%%%%% Filename: fsa2 %%%%%%
+F
+(S (A "he"))
+(A (B "ran"))
+(B (F "home"))
