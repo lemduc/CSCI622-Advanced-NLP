@@ -1,0 +1,2 @@
+The Viterbi algorithm can run directly from the source code. For example: python 1.Viterbi_algo.py
+To have different type of input string, change the value of "test_string" variable at the beginning of the file

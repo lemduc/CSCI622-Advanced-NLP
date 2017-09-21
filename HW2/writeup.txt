@@ -1,0 +1,316 @@
+Duc Minh Le
+
+Q1. I have tried the following commands
+a, eword-epron.wfst
+command: echo '"DATA"' | carmel -sliOEQk 5 eword-epron.wfst
+result:
+D AE T AH 1
+D EY T AH 1
+
+command: echo '"WHALEBONES"' | carmel -sliOEQk 5 eword-epron.wfst
+result:
+0
+0
+
+eword-epron.wfst machine can translate English words to English phoneme sequences. In this case, there are 2 posible output for "DATA", 0 ouput for "WHALEBONES"
+
+command: echo '"N" "AY" "T"' | carmel -sriIEQk 5 eword-epron.wfst
+result: 
+NIGHT 1
+KNIGHT 1
+
+In this case, eword-epron.wfst is used to translate a English phoneme sequence to positble words, there are 2 possible words for this case.
+
+b, eword.wfsa
+
+command: echo '"JOHNSTON"' | carmel -sriIEQk 5 eword.wfsa
+result:
+JOHNSTON 1.5717429e-05
+
+command: echo '"JOHN" "STUN"' | carmel -sriIEQk 5 eword.wfsa
+result:
+JOHN STUN 3.89502740483762e-10
+
+command: echo '"JAW" "STUN"' | carmel -sriIEQk 5 eword.wfsa
+result:
+JAW STUN 2.64368400540572e-12
+
+eword.wfsa machine can give us the probablity of an input string. In this case, three input strings have decreasing values of probablility in order. 
+
+
+Q2. 
+
+command: echo 'B" "EH" "R"' | carmel -sriIEQk 5 eword-epron.wfst
+result:
+Input line 1: "B" "EH" "R"
+	(11 states / 14 arcs)
+BEHR 1
+BEAR 1
+BARE 1
+BAHR 1
+BAER 1
+
+all five words have the probability of 1.
+
+Q3. 
+
+command: echo '"WHERE"' | carmel -sliOEQk 5 eword-epron.wfst epron-eword.wfst
+result: 
+Input line 1: "WHERE"
+	(209215 states / 209215 arcs reduce-> 12/12)
+	(32 states / 38 arcs reduce-> 14/16)
+WHERE 1
+WEAR 1
+WHERE 1
+WARE 1
+0
+
+"WHERE" has two different phenome sequences. For each of phenome sequence, there is one sound similar word. In summary, two words we are looking for are "WEAR" and "WARE"
+
+command:  echo '"ICE" "CREAM"' | carmel -sliOEQk 5 eword-epron.wfst epron-eword.wfst
+ICE CREAM 1
+EYE SCREAM 1
+AY SCREAM 1
+AI SCREAM 1
+0
+
+Similarly, there are 3 words which have the similar sound to "ICE CREAM"
+
+Q4. 
+command: carmel -brIEQk 5 eword.wfsa eword-epron.wfst epron-jpron.wfst japanese.txt
+output: 
+Input line 1: "A" "N" "J" "I" "R" "A" "N" "A" "I" "T" "O"
+	(185 states / 365 arcs reduce-> 22/202)
+	(32007 states / 43490 arcs reduce-> 23126/33756)
+	(20416 states / 28336 arcs reduce-> 17975/25869)
+ANGELA NIGHT 6.72142550187099e-14
+ANGELA MIGHT 2.64749165631125e-14
+ANGELA KNIGHT 7.70689811587644e-15
+ANGELA NATO 1.67217006926649e-15
+ENGINE NIGHT 1.5465616231303e-15
+Input line 2: "S" "U" "CH" "I" "I" "B" "E" "N" "R" "A" "R" "U" "Z" "U"
+	(187 states / 385 arcs reduce-> 29/227)
+	(19999 states / 27318 arcs reduce-> 13393/19997)
+	(11681 states / 16573 arcs reduce-> 10384/15268)
+STEPHENS NEWS 2.44237232192372e-17
+STEPHEN RAILS 1.9997102618981e-17
+STEVENS NEWS 1.72076233168506e-17
+STEVEN RAILS 1.41283881849147e-17
+STEPHEN AROUSE 3.03265876255431e-18
+Input line 3: "D" "O" "N" "A" "R" "U" "D" "O" "T" "O" "R" "A" "N" "P" "U"
+	(219 states / 423 arcs reduce-> 30/234)
+	(34801 states / 47278 arcs reduce-> 25143/36778)
+	(22077 states / 30646 arcs reduce-> 19369/27892)
+DONALD TRUMP 2.15597863423934e-16
+DONALD TRAMP 1.35909838816293e-17
+DONALD TRUMPED 1.59854081738417e-18
+DONALD TRUMPS 7.04001335210211e-19
+DONALD AUTO LUMP 1.28728192146916e-19
+Input line 4: "SH" "Y" "E" "R" "I" "R" "U" "S" "A" "N" "D" "O" "B" "A" "A" "G" "U"
+	(251 states / 482 arcs reduce-> 35/266)
+	(41789 states / 56910 arcs reduce-> 29926/43788)
+	(26384 states / 36704 arcs reduce-> 23235/33531)
+SHERRILL SANDBERG 5.18938779600761e-18
+CHERYL SANDBERG 2.10463479458708e-18
+SHARE IL SANDBERG 2.1012085570388e-18
+SHARE ILL SANDBERG 1.95136556393585e-18
+SHARE NEW SANDBERG 1.23638918005372e-18
+Derivations found for all 4 inputs
+Viterbi (best path) product of probs=e^-144.454900479342, probability=2^-208.404 per-input-symbol-perplexity(N=57)=2^3.65622 per-line-perplexity(N=4)=2^52.1011
+
+
+
+Q5. 
+Note: I have to change to test case to lower cases because I converted train-data to lower cases while build wfst and wfsa
+
+A, Unigram System
+command: carmel -brIEQk 5 unigram.wfsa tag-to-word.wfst test-data-1.sent
+output:
+Input line 1: "that" "is" "a" "test" "."
+	(6 states / 18 arcs)
+	(6 states / 18 arcs)
+IN VBZ DT NN . 7.9952731744762e-12
+WDT VBZ DT NN . 3.38650811187648e-12
+DT VBZ DT NN . 2.18760638951102e-12
+IN VBZ DT NNP . 7.61454588045351e-13
+WDT VBZ DT NNP . 3.22524582083475e-13
+Input line 2: "the" "fly" "knows" "how" "to" "fly" "."
+	(8 states / 16 arcs)
+	(8 states / 16 arcs)
+DT VB VBZ WRB TO VB . 9.1332978016663e-22
+DT NN VBZ WRB TO VB . 1.52221630027774e-22
+DT VBP VBZ WRB TO VB . 1.52221630027772e-22
+DT VB VBZ WRB TO NN . 1.52221630027772e-22
+DT VB VBZ WRB TO VBP . 1.52221630027772e-22
+Input line 3: "the" "company" "has" "agreed" "to" "release" "its" "tax" "returns" "since" "1985" "," "and" "those" "of" "its" "affiliates" "and" "partnerships" "."
+	(21 states / 40 arcs)
+	(21 states / 40 arcs)
+DT NN VBZ VBD TO NN PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC NNS . e^-129.822085218511
+DT NN VBZ VBN TO NN PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC NNS . e^-130.894722020776
+DT NN VBZ VBD TO NN PRP$ NN VBZ IN CD , CC DT IN PRP$ NNS CC NNS . e^-131.901526760191
+DT NN VBZ VBD TO NN PRP$ NNP NNS IN CD , CC DT IN PRP$ NNS CC NNS . e^-132.055677440018
+DT NN VBZ VBN TO NN PRP$ NN VBZ IN CD , CC DT IN PRP$ NNS CC NNS . e^-132.974163562456
+Derivations found for all 3 inputs
+Viterbi (best path) product of probs=e^-203.819201032052, probability=2^-294.049 per-input-symbol-perplexity(N=32)=2^9.18903 per-line-perplexity(N=3)=2^98.0163
+
+*****
+Corrrect answer:
+DT VBZ DT NN .
+DT NN VBZ WRB TO VB .
+DT NN VBZ VBN TO VB PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC NNS .
+
+My answer: 
+DT VBZ DT NN - correct in top 3
+DT NN VBZ WRB TO VB - correct in top 2
+DT NN VBZ VBN TO NN PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC NNS . - 1 wrong
+*****
+
+B, Bigram System
+Command: carmel -brIEQk 5 bigram.wfsa tag-to-word.wfst test-data-1.sent
+Output: 
+Input line 1: "that" "is" "a" "test" "."
+	(6 states / 18 arcs)
+	(18 states / 47 arcs reduce-> 17/46)
+WDT VBZ DT NN . 2.88957147307273e-09
+WDT VBZ DT NNP . 5.21701068436528e-11
+DT VBZ DT NN . 1.97678475483778e-11
+IN VBZ DT NN . 2.71914007348383e-12
+RB VBZ DT NN . 2.11415838945618e-12
+Input line 2: "the" "fly" "knows" "how" "to" "fly" "."
+	(8 states / 16 arcs)
+	(17 states / 34 arcs)
+DT NN VBZ WRB TO VB . 5.62846192781718e-20
+DT NN VBZ WRB TO NN . 4.67761342859991e-22
+DT VBP VBZ WRB TO VB . 1.06396204539141e-22
+DT VB VBZ WRB TO VB . 3.55351573356159e-23
+JJ NN VBZ WRB TO VB . 8.06374947872406e-24
+Input line 3: "the" "company" "has" "agreed" "to" "release" "its" "tax" "returns" "since" "1985" "," "and" "those" "of" "its" "affiliates" "and" "partnerships" "."
+	(21 states / 40 arcs)
+	(41 states / 72 arcs)
+DT NN VBZ VBN TO NN PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC NNS . e^-122.59126752374
+DT NN VBZ VBN TO NN PRP$ NN VBZ IN CD , CC DT IN PRP$ NNS CC NNS . e^-125.191216164806
+DT NN VBZ VBD TO NN PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC NNS . e^-126.59775620687
+DT NN VBZ VBN TO NN PRP$ NNP NNS IN CD , CC DT IN PRP$ NNS CC NNS . e^-127.844187943659
+DT NN VBZ VBN TO NN PRP$ NN NNS RB CD , CC DT IN PRP$ NNS CC NNS . e^-128.577468200801
+Derivations found for all 3 inputs
+Viterbi (best path) product of probs=e^-186.577290796041, probability=2^-269.174 per-input-symbol-perplexity(N=32)=2^8.41169 per-line-perplexity(N=3)=2^89.7247
+
+*****
+Corrrect answer:
+DT VBZ DT NN .
+DT NN VBZ WRB TO VB .
+DT NN VBZ VBN TO VB PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC NNS .
+
+My answer: 
+DT VBZ DT NN - correct in top 3
+DT NN VBZ WRB TO VB - correct in top 1
+DT NN VBZ VBN TO NN PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC NNS . - 1 wrong
+***
+
+Conclusion: each system made 1 errors in total
+
+Q6.
+I think the error is because the size of the data is not big enough
+
+Q7
+To correct the error, we can collect more data to improve the accuracy of the model
+
+Q8
+
+Trace of first two columns (output in console)
+
+loop 0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0.03550124958756084
+0
+0
+0
+0
+0
+0
+0
+0
+0.00048635979617162755
+0
+0.010318170819199233
+0
+0.0031344726053181616
+0
+0
+0
+0
+0
+0
+0
+0
+0
+
+loop 1
+0.0
+0.0
+0.0
+0.0
+0
+0.0
+0
+0.0
+0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+4.2333204510673454e-07
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+0.0
+7.338106904106804e-05
+0.0
+
+Q9
+Percentage of non-zero cells in sentence 1: 10.5%
+Percentage of non-zero cells in sentence 2: 6.5%
+Percentage of non-zero cells in sentence 3: 5.4%
+
+Q10
+
+Tag sequence of sentence 1: DT VBZ DT NN - wrong the last one
+Tag sequence of sentence 2: DT NN VBZ WRB TO NNS - correct to carmel
+Tag sequence of sentence 3: DT NN VBZ VBN TO NN PRP$ NN NNS IN CD , CC DT IN PRP$ NNS CC RB -  wrong the last one
+
+Q11.
+command: echo '"e" "r" " " "v" "s" "m" " " "g" "t" "r" "r" "x" "r" " " "u" "p" "i" "t" " " "v" "s" "t" " " "i" "m" "y" "o" "a" " " "d" "v" "o" "r" "m" "v" "r" " " "f" "o" "d" "v" "p" "b" "r" "t" "d" " " "s" "e" "s" "u" " " "y" "p" " " "t" "r" "q" "s" "o" "t" " " "o" "y"' | carmel -sliOEQk 1 decipher.wfst
+
+output: w e   c a n   f r e e z e   y o u r   c a r   u n t i l   s c i e n c e   d i s c o v e r s   a w a y   t o   r e p a i r   i t 1
