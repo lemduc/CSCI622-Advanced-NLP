@@ -1,0 +1,3 @@
+3.generate_alignments.py: run to get the list of all alignments
+5.check_accuracy.py: check accuracy of automatic alignmen
+6.create_epron-jpron_unsupervised_wfst.py: creat epron-jpron_unsupervised.wfst to test with Carmel
